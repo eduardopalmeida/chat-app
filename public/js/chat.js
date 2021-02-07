@@ -17,6 +17,29 @@ const formText = document.querySelector('input')
 // Options
 const { username, room } = Qs.parse(location.search, { ignoreQueryPrefix: true })
 
+const autoscroll = () => {
+     // New message element
+    const $newMessage = $messages.lastElementChild
+
+    // Height of new Message
+    const newMessageStyles = getComputedStyle($newMessage)
+    const newMessageMargin = parseInt(newMessageStyles.marginBottom)
+    const newMessageHeight = $newMessage.offsetHeight + newMessageMargin
+
+    const visibleHeight = $messages.offsetHeight
+    
+    // Height of message Container
+    const containerHeight = $messages.scrollHeight
+
+    // How far have I scrolled
+    const scrollOffset = $messages.scrollTop + visibleHeight
+    
+
+    if(containerHeight - newMessageHeight <= scrollOffset) {
+        $messages.scrollTop = $messages.scrollHeight    
+    }
+    
+}
 
 socket.on('message', (message) => {
     console.log(message)
@@ -27,6 +50,7 @@ socket.on('message', (message) => {
         createdAt : moment(message.createdAt).format('HH:mm:ss')
     })
     $messages.insertAdjacentHTML('beforeend', html)
+    autoscroll()
 })
 
 socket.on('locationMessage', (message) => {
@@ -38,6 +62,7 @@ socket.on('locationMessage', (message) => {
         createdAt : moment(message.createdAt).format('HH:mm:ss')
     })
     $messages.insertAdjacentHTML('beforeend', html)
+    autoscroll()
 })
 
 socket.on('roomData', ({room, users}) => {
@@ -56,7 +81,7 @@ formulario.addEventListener('submit', (e) => {
 
     const message = e.target.elements.message.value
 
-    socket.emit('sendmessage', message, (error) => {
+    socket.emit('sendMessage', message, (error) => {
 
         $messageFormButton.removeAttribute('disabled')
         $messageFormInput.value = ''

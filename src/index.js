@@ -46,11 +46,12 @@ io.on('connection', (socket) => {
       
     })
 
-    socket.on('sendmessage', (message, callback) => {
+    socket.on('sendMessage', (message, callback) => {
       const filter = new Filter()  
       const user = getUser(socket.id)
       
       if(filter.isProfane(message)) {
+        alert("Profanidade não é permitida!")
         return callback('Profanidade não é permitida!')
       }
 
@@ -76,13 +77,12 @@ io.on('connection', (socket) => {
       if(user) {
         // io.to(user.room).emit('message', generateMessage('Admin', `User ${user.username} has left ${user.room} !`))
         io.to(user.room).emit('message', generateMessage(`${user.username} saiu de ${user.room} !`))
+        
+        io.to(user.room).emit('roomData', {
+          room: user.room,
+          users: getUsersInRoom(user.room)
+        })
       }
-
-      io.to(user.room).emit('roomData', {
-        room: user.room,
-        users: getUsersInRoom(user.room)
-      })
-
     })
 })
 
